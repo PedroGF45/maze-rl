@@ -55,17 +55,9 @@ class MazeGame:
         self.clock = pygame.time.Clock()
 
     def _initialize_positions(self, grid_w, grid_h):
-        # init player position
-        self.player = Point(0, 0)
-        self.score = 0
         
         # valid positions for everyone
         self.valid_positions = [Point(x, y) for x in range(0, grid_w, 2) for y in range(0, grid_h, 2)]
-        self.valid_positions.remove(self.player)
-
-        # bolor position
-        self.mold = Point(10,10)
-        self.valid_positions.remove(self.mold)
 
         # toaster position
         #self.toaster = random.choice(self.valid_positions)
@@ -74,6 +66,7 @@ class MazeGame:
 
         # butter positions
         self.butter = random.choice(self.valid_positions)
+        #self.butter = Point(8, 10)
 
         # valid positions for barriers
         self.valid_barriers = set(Point(x, y) for x in range(grid_w) for y in range(grid_h) if (x % 2 != 0) != (y % 2 != 0))
@@ -85,8 +78,16 @@ class MazeGame:
 
     def _initialize_game_state(self):
 
+        self.score = 0
+
+        # init player position
+        self.player = Point(0, 0)
+
         # set player direction
         self.direction = Direction.RIGHT
+
+        # mold position
+        self.mold = Point(10,10)
 
         # set player visited positions
         self.visited_positions = set()
@@ -143,19 +144,19 @@ class MazeGame:
 
             if event.type == pygame.KEYUP:
                 if event.key == pygame.K_UP:
-                    if (Point(self.player.x, self.player.y - 1) not in self.known_barriers):
+                    if (Point(self.player.x, self.player.y - 1) not in self.known_barriers) and (Point(self.player.x, self.player.y - 2) in self.valid_positions):
                         self.direction = Direction.UP
                         has_decided = True
                 if event.key == pygame.K_DOWN:
-                    if (Point(self.player.x, self.player.y + 1) not in self.known_barriers):
+                    if (Point(self.player.x, self.player.y + 1) not in self.known_barriers) and (Point(self.player.x, self.player.y + 2) in self.valid_positions):
                         self.direction = Direction.DOWN
                         has_decided = True
                 if event.key == pygame.K_LEFT:
-                    if (Point(self.player.x - 1, self.player.y) not in self.known_barriers):
+                    if (Point(self.player.x - 1, self.player.y) not in self.known_barriers) and (Point(self.player.x - 2, self.player.y) in self.valid_positions):
                         self.direction = Direction.LEFT
                         has_decided = True
                 if event.key == pygame.K_RIGHT:
-                    if (Point(self.player.x + 1, self.player.y) not in self.known_barriers):
+                    if (Point(self.player.x + 1, self.player.y) not in self.known_barriers) and (Point(self.player.x + 2, self.player.y) in self.valid_positions):
                         self.direction = Direction.RIGHT
                         has_decided = True
 
@@ -297,6 +298,10 @@ class MazeGame:
         if self.mold in self.possible_toaster and self.mold != self.toaster:
             self.possible_toaster.remove(self.mold)
 
+        if self.player == self.toaster:
+            self.know_toaster = True
+            self.possible_toaster = [self.toaster]
+
         # if there's more than one possible toaster position we can remove some positions
         if len(self.possible_toaster) > 1:
             copy_possible_toaster = self.possible_toaster.copy()
@@ -322,22 +327,48 @@ class MazeGame:
     
     def _remove_possible_butter(self):
         for (x, y) in self.possible_butter:
-            if (self._get_distance(Point(x, y), self.player) != 2 * self.distances[self.player.x, self.player.y]):
+            if (self._get_distance(Point(x, y), self.player) != 2 * self.distances[self.player.x, self.player.y]) or (x,y) in self.mold_visited:
                 self.possible_butter.remove(Point(x, y))
                 
     def _get_distance(self, p1, p2):
-        #print("Distance from ", p1, " to ", p2, " is ", abs(p1.x - p2.x) + abs(p1.y - p2.y))
         return abs(p1.x - p2.x) + abs(p1.y - p2.y)
 
     def _is_game_over(self):
 
         # if player hits butter player wins
-        # if mold hits toaster player wins
-        # if player hits mold player loses
-        # if mold hits butter player loses
-
-        if self.player == self.butter or self.mold == self.toaster or self.player == self.mold or self.mold == self.butter:
+        if self.player == self.butter:
+            self.display.fill(BLACK)
+            text = pygame.font.Font(None, 36).render("You Win: player reached butter!", True, WHITE)
+            self.display.blit(text, (self.w/4, self.h/4))
+            pygame.display.flip()
             return True
+        # if mold hits toaster player wins
+        elif self.mold == self.toaster:
+            self.display.fill(BLACK)
+            text = pygame.font.Font(None, 36).render("You Win: mold reached toaster!", True, WHITE)
+            self.display.blit(text, (self.w/4, self.h/4))
+            pygame.display.flip()
+            return True
+            
+        # if player hits mold player loses
+        elif self.player == self.mold:
+            self.display.fill(BLACK)
+            text = pygame.font.Font(None, 36).render("You Lose: player reached mold!", True, WHITE)
+            self.display.blit(text, (self.w/4, self.h/4))
+            pygame.display.flip()
+            return True
+            
+        # if mold hits butter player loses
+        elif self.mold == self.butter:
+            self.display.fill(BLACK)
+            text = pygame.font.Font(None, 36).render("You Lose: mold reached butter!", True, WHITE)
+            self.display.blit(text, (self.w/4, self.h/4))
+            pygame.display.flip()
+            return True
+        
+        return False
+            
+        
         
     def _update_ui(self):
 
@@ -365,7 +396,8 @@ class MazeGame:
 
         # draw toaster
         if self.know_toaster:
-            pygame.draw.rect(self.display, RED, (self.toaster.x * GRID_SIZE + OFF_SET + int(GRID_SIZE/2), self.toaster.y * GRID_SIZE + OFF_SET + int(GRID_SIZE/2), GRID_SIZE, GRID_SIZE))
+            text_letter = pygame.font.Font(None, 36).render("T", True, WHITE)
+            self.display.blit(text_letter, (self.toaster.x * GRID_SIZE + 2*GRID_SIZE - 2*OFF_SET, self.toaster.y * GRID_SIZE + OFF_SET * 2))
 
         # draw known barriers
         for barrier in self.known_barriers:
@@ -395,6 +427,8 @@ if __name__ == "__main__":
         game_over, score = game.play_step()
 
         if game_over:
+            # wait for 3 seconds and quit
+            pygame.time.wait(1000)
             break
 
     pygame.quit()
