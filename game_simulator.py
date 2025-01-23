@@ -65,8 +65,8 @@ class MazeGame:
         self.toaster_heat = [(self.toaster.x + 2, self.toaster.y), (self.toaster.x - 2, self.toaster.y), (self.toaster.x, self.toaster.y + 2), (self.toaster.x, self.toaster.y - 2)]
 
         # butter positions
-        self.butter = random.choice(self.valid_positions)
-        #self.butter = Point(8, 10)
+        #self.butter = random.choice(self.valid_positions)
+        self.butter = Point(2, 10)
 
         # valid positions for barriers
         self.valid_barriers = set(Point(x, y) for x in range(grid_w) for y in range(grid_h) if (x % 2 != 0) != (y % 2 != 0))
@@ -124,9 +124,6 @@ class MazeGame:
 
         # reveal barriers on player position
         self._reveal_barriers()
-
-        # update state
-        self._update_state()
 
         # update ui and clock
         self._update_ui()
@@ -326,7 +323,8 @@ class MazeGame:
         return possible_butter
     
     def _remove_possible_butter(self):
-        for (x, y) in self.possible_butter:
+        possible_butter = self.possible_butter.copy()
+        for (x, y) in possible_butter:
             if (self._get_distance(Point(x, y), self.player) != 2 * self.distances[self.player.x, self.player.y]) or (x,y) in self.mold_visited:
                 self.possible_butter.remove(Point(x, y))
                 
