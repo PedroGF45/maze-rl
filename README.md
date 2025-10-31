@@ -80,16 +80,16 @@ During training, two plots are generated and saved:
 ### Example Screenshots
 
 #### 1. Training Progress (Score and Mean Score)
-![Training Progress](./plot_reward_example.png)
+![Training Progress](./plot_reward.png)
 
 #### 2. Win/Loss/Tie Statistics
-![Win/Loss/Tie Bar Plot](./plot_bar_example.png)
+![Win/Loss/Tie Bar Plot](./plot_bar.png)
 
 #### 3. Maze Game State (Pygame Window)
-![Maze Game Example](./maze_game_example.png)
+![Maze Game Example](./game_example.png)
 
 #### 4. Sample Training Output (Console)
-![Console Output Example](./console_output_example.png)
+![Console Output Example](./console_example.png)
 
 ## Contributing
 Contributions are welcome! Please open issues or submit pull requests for improvements or bug fixes.
