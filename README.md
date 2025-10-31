@@ -71,10 +71,25 @@ maze-rl/
 └── ...
 ```
 
-## Visualizations
+
+## Visualizations & Examples
 During training, two plots are generated and saved:
 - `plot_reward.png`: Shows the agent's score and mean score over time.
 - `plot_bar.png`: Displays win/loss/tie statistics.
+
+### Example Screenshots
+
+#### 1. Training Progress (Score and Mean Score)
+![Training Progress](./plot_reward_example.png)
+
+#### 2. Win/Loss/Tie Statistics
+![Win/Loss/Tie Bar Plot](./plot_bar_example.png)
+
+#### 3. Maze Game State (Pygame Window)
+![Maze Game Example](./maze_game_example.png)
+
+#### 4. Sample Training Output (Console)
+![Console Output Example](./console_output_example.png)
 
 ## Contributing
 Contributions are welcome! Please open issues or submit pull requests for improvements or bug fixes.
